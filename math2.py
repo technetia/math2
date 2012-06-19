@@ -19,9 +19,47 @@ the function here will simply serve as a copy of the math module version.
 """
 
 import sys as _sys
+import random as _random
 from math import *
 
 _MAJOR_VERSION_N, _MINOR_VERSION_N = _sys.version_info[:2]
+
+######################################################################
+## helper functions
+######################################################################
+
+def _quickselect(array, k):
+    """
+    Simple implementation of quickselect.
+    """
+    if len(array) < 2:
+        return array[k]
+
+    pivot = _random.randrange(len(array))
+    # partition
+    array[0], array[pivot] = array[pivot], array[0]
+    i = 1
+    j = len(array) - 1
+    while True:
+        while i < len(array) and array[i] <= array[0]:
+            i += 1
+        while j >= 1 and array[j] > array[0]:
+            j -= 1
+
+        if j < i:
+            break
+
+        array[i], array[j] = array[j], array[i]
+
+    array[0], array[j] = array[j], array[0]
+
+    # select
+    if j == k:
+        return array[j]
+    elif j > k:
+        return _quickselect(array[:j], k)
+    elif j < k:
+        return _quickselect(array[j+1:], k-j-1)
 
 ######################################################################
 ## series and summations
@@ -161,14 +199,13 @@ def median(a, *args):
     """
     Computes the median of the given arguments (min. 1).
     """
-    # need to replace this with quickselect later
-    augmented_args = sorted((a,) + args)
-    augmented_args_len = len(augmented_args)
-    if augmented_args_len % 2 == 1:
-        return augmented_args[augmented_args_len // 2]
+    augmented_args = (a,) + args
+    n = len(augmented_args)
+    if n % 2 != 0:
+        return _quickselect(list(augmented_args), n // 2)
     else:
-        return (augmented_args[augmented_args_len // 2 - 1] +
-                augmented_args[augmented_args_len // 2]) / 2
+        return float(_quickselect(list(augmented_args), n // 2) +
+                _quickselect(list(augmented_args), n // 2 + 1)) / 2
 
 def mode(a, *args):
     """
