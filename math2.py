@@ -317,7 +317,7 @@ def quadratic(a, b, c):
     if a == 0:
         raise ValueError("a cannot be zero")
     
-    disc = b**2 - (4*a*c)
+    disc = fsum([-(4*a*c)], b**2)
     if disc < 0:
         return (None, None)
     
@@ -344,9 +344,27 @@ def cubic(a, b, c, d):
     if a == 0:
         raise ValueError("a cannot be zero")
 
-    # need to derive efficient numeric solution of cubics
-    # (that are guaranteed to work)
-    raise NotImplemented
+    alpha = b/a
+    beta = c/a
+    gamma = d/a
+    
+    q = fsum([alpha**2], -3*beta) / 9
+    r = fsum([-9*alpha*beta, 27*gamma], 2*alpha**3) / 54
+
+    # three real roots; need trig functions to avoid complex arithmetic
+    if r**2 < q**3:
+        theta = acos(r / sqrt(q**3))
+        x1 = -2 * sqrt(q) * cos(theta / 3) - float(alpha)/3
+        x2 = -2 * sqrt(q) * cos((theta + 2*pi) / 3) - float(alpha)/3
+        x3 = -2 * sqrt(q) * cos((theta - 2*pi) / 3) - float(alpha)/3
+        return x1, x2, x3
+
+    # one real root; compute as normal
+    X = -sgn(r) * cbrt(abs(r) + sqrt(r**2-q**3))
+    Y = q/X if X != 0 else 0
+
+    x1 = fsum([X, Y], -alpha/3)
+    return x1, None, None
 
 ######################################################################
 ## trigonometric and hyperbolic functions
@@ -441,10 +459,7 @@ def sgn(x):
     0 if zero
     -1 if negative
     """
-    if x == 0:
-        return 0
-    else:
-        return abs(x) / x
+    return (0 if x == 0 else abs(x) / x)
 
 def cbrt(x):
     """
@@ -452,10 +467,7 @@ def cbrt(x):
     useful addition that if x is negative, the function will still
     compute the correct (real) result, instead of raising a ValueError.
     """
-    if x < 0:
-        return (-1)*(-x)**(1.0/3)
-    else:
-        return x**(1.0/3)
+    return ((-1)*(-x)**(1.0/3) if x < 0 else x**(1.0/3))
 
 def ln(x):
     """
