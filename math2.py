@@ -344,9 +344,9 @@ def cubic(a, b, c, d):
     if a == 0:
         raise ValueError("a cannot be zero")
 
-    alpha = b/a
-    beta = c/a
-    gamma = d/a
+    alpha = float(b)/a
+    beta = float(c)/a
+    gamma = float(d)/a
     
     q = fsum([alpha**2], -3*beta) / 9
     r = fsum([-9*alpha*beta, 27*gamma], 2*alpha**3) / 54
